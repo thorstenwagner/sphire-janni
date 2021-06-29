@@ -84,11 +84,14 @@ def predict_dir(
     :return: List of paths to denoised images
     """
     list_files = []
-    for (dirpath, dirnames, filenames) in os.walk(input_path):
-        for filename in filenames:
-            if filename.endswith(utils.SUPPORTED_FILES):
-                path = os.path.join(dirpath, filename)
-                list_files.append(path)
+    if os.path.isfile(input_path):
+        list_files = [input_path]
+    else:
+        for (dirpath, dirnames, filenames) in os.walk(input_path):
+            for filename in filenames:
+                if filename.endswith(utils.SUPPORTED_FILES):
+                    path = os.path.join(dirpath, filename)
+                    list_files.append(path)
 
     denoise_image_paths = predict_list(
         list_files,
