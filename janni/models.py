@@ -26,11 +26,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from keras.models import Model
-from keras.layers import Input, Add, Conv2DTranspose, MaxPooling2D, UpSampling2D, ReLU
-from keras.layers.convolutional import Conv2D
-from keras.layers.advanced_activations import LeakyReLU
-from keras.layers.merge import concatenate
+from tensorflow.keras import Model
+from tensorflow.keras.layers import (
+    Add,
+    Conv2D,
+    Conv2DTranspose,
+    Input,
+    LeakyReLU,
+    MaxPooling2D,
+    ReLU,
+    UpSampling2D,
+    concatenate,
+)
 
 
 def get_rednet(

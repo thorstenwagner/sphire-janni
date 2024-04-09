@@ -29,7 +29,7 @@ SOFTWARE.
 from . import models
 from . import patch_pair_generator as gen
 from . import utils
-from keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam
 import os
 import mrcfile
 import tifffile

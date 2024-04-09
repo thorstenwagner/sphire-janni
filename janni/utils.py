@@ -29,7 +29,6 @@ SOFTWARE.
 import mrcfile
 import tifffile
 import numpy as np
-from . import utils
 
 SUPPORTED_FILES = (".mrc", ".mrcs", ".tiff", ".tif")
 
@@ -195,7 +194,7 @@ def create_image_pair(movie_path, fbinning=fourier_binning):
     import os
 
     bin_file = os.path.join(os.path.dirname(movie_path), "bin.txt")
-    data = utils.read_image(movie_path)
+    data = read_image(movie_path)
 
     even = np.sum(data[::2], axis=0).astype(np.float32)
     odd = np.sum(data[1::2], axis=0).astype(np.float32)
