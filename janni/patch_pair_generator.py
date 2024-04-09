@@ -26,10 +26,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from keras.utils import Sequence
+from tensorflow.keras.utils import Sequence
 from random import shuffle
 import numpy as np
-import mrcfile
 from . import utils
 
 
