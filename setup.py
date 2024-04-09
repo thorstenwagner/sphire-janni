@@ -34,7 +34,7 @@ setup(
     },
     install_requires=[
         "mrcfile >=1.3.0",
-        "Keras == 2.3.1", # that doesnt seem to work. try tensorflow 1.14.0 in combination with keras 2.2.5
+        "Keras == 2.3.1",
         "numpy >= 1.16.0, < 1.19.0",
         "h5py >= 2.5.0, < 3.0.0",
         "Pillow >= 6.0.0",
