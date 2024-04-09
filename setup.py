@@ -37,7 +37,7 @@ setup(
     install_requires=[
         "mrcfile >=1.3.0",
         "Keras",
-        "numpy >= 1.16.0, < 1.26.4",
+        "numpy >= 1.16.0, <= 1.26.4",
         "h5py >= 2.5.0",
         "Pillow >= 6.0.0",
         "Cython",
