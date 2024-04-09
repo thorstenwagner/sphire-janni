@@ -31,7 +31,6 @@ from . import patch_pair_generator as gen
 from . import utils
 from keras.optimizers import Adam
 import os
-from . import utils
 import mrcfile
 import tifffile
 import numpy as np
@@ -182,7 +181,7 @@ def calc_even_odd(
                         path = os.path.join(dirpath, filename)
                         movies_to_split.append((path, filename))
 
-            if recursive == False:
+            if recursive is False:
                 break
 
     for tuble_index, movie_tuble in enumerate(movies_to_split):
@@ -269,7 +268,7 @@ def train_pairs(
         model = models.get_model_unet(input_size=patch_size, kernel_size=(3, 3))
     opt = Adam(lr=learning_rate, epsilon=10**-8, amsgrad=True)
     model.compile(optimizer=opt, loss=loss)
-    history = model.fit_generator(
+    model.fit_generator(
         generator=train_gen,
         epochs=epochs,
         callbacks=callbacks,

@@ -26,7 +26,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import argparse
 import sys
 import json
 import os
@@ -235,7 +234,7 @@ def _main_():
     import sys
 
     if len(sys.argv) >= 2:
-        if not "--ignore-gooey" in sys.argv:
+        if "--ignore-gooey" not in sys.argv:
             sys.argv.append("--ignore-gooey")
 
     kwargs = {"terminal_font_family": "monospace", "richtext_controls": True}
@@ -339,7 +338,7 @@ def main(args=None):
                     try:
                         u = model.tolist()
                         model = u.decode()
-                    except:
+                    except Exception:
                         pass
                     patch_size = tuple(f["patch_size"])
                 except KeyError:

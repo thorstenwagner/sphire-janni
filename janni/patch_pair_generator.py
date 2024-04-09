@@ -29,7 +29,6 @@ SOFTWARE.
 from keras.utils import Sequence
 from random import shuffle
 import numpy as np
-import mrcfile
 from . import utils
 
 

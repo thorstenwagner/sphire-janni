@@ -230,7 +230,7 @@ def read_image(path, use_mmap=False):
             img = tifffile.imread(path)
         return img
     elif path.endswith(("mrc", "mrcs")):
-        if use_mmap == False:
+        if use_mmap is False:
             mrc_image_data = mrcfile.open(path, permissive=True, mode="r")
         else:
             mrc_image_data = mrcfile.mmap(path, permissive=True, mode="r")
