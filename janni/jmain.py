@@ -46,6 +46,7 @@ DEFAULT_PADDING = 24
 
 ARGPARSER = None
 
+
 def create_config_parser(parser):
     config_required_group = parser.add_argument_group(
         "Required arguments",
@@ -62,7 +63,7 @@ def create_config_parser(parser):
                 "test": 'user_input.endswith("json")',
                 "message": "File has to end with .json!",
             },
-            "default_file": "config_janni.json"
+            "default_file": "config_janni.json",
         },
     )
 
@@ -94,10 +95,9 @@ def create_config_parser(parser):
                 "test": 'user_input.endswith("h5")',
                 "message": "File has to end with .h5!",
             },
-            "default_file": "janni_model.h5"
+            "default_file": "janni_model.h5",
         },
     )
-
 
     config_optional_group = parser.add_argument_group(
         "Optional arguments",
@@ -108,7 +108,10 @@ def create_config_parser(parser):
         "--loss",
         default="mae",
         help="Loss function that is used during training: Mean squared error (mse) or mean absolute error (mae).",
-        choices=["mae", "mse",],
+        choices=[
+            "mae",
+            "mse",
+        ],
     )
     config_optional_group.add_argument(
         "--patch_size",
@@ -148,9 +151,7 @@ def create_train_parser(parser):
         "config_path",
         help="Path to config.json",
         widget="FileChooser",
-        gooey_options={
-            "wildcard": "*.json"
-        }
+        gooey_options={"wildcard": "*.json"},
     )
 
     optional_group = parser.add_argument_group(
@@ -160,6 +161,7 @@ def create_train_parser(parser):
     optional_group.add_argument(
         "-g", "--gpu", type=int, default=-1, help="GPU ID to run on"
     )
+
 
 def create_predict_parser(parser):
     required_group = parser.add_argument_group(
@@ -181,9 +183,7 @@ def create_predict_parser(parser):
         "model_path",
         help="File path to trained model.",
         widget="FileChooser",
-        gooey_options={
-            "wildcard": "*.h5"
-        }
+        gooey_options={"wildcard": "*.h5"},
     )
 
     optional_group = parser.add_argument_group(
@@ -205,19 +205,23 @@ def create_predict_parser(parser):
         "-g", "--gpu", type=int, default=-1, help="GPU ID to run on"
     )
 
+
 def create_parser(parser):
 
     subparsers = parser.add_subparsers(help="sub-command help")
 
-    parser_config= subparsers.add_parser("config", help="Create the configuration file for JANNI")
+    parser_config = subparsers.add_parser(
+        "config", help="Create the configuration file for JANNI"
+    )
     create_config_parser(parser_config)
 
     parser_train = subparsers.add_parser("train", help="Train JANNI for your dataset.")
     create_train_parser(parser_train)
 
-    parser_predict = subparsers.add_parser("denoise", help="Denoise micrographs using a (pre)trained model.")
+    parser_predict = subparsers.add_parser(
+        "denoise", help="Denoise micrographs using a (pre)trained model."
+    )
     create_predict_parser(parser_predict)
-
 
 
 def get_parser():
@@ -238,7 +242,7 @@ def _main_():
     Gooey(
         main,
         program_name="JANNI " + ini.__version__,
-        #image_dir=os.path.join(os.path.abspath(os.path.dirname(__file__)), "../icons"),
+        # image_dir=os.path.join(os.path.abspath(os.path.dirname(__file__)), "../icons"),
         progress_regex=r"^.* \( Progress:\s+(-?\d+) % \)$",
         disable_progress_bar_animation=True,
         tabbed_groups=True,
@@ -253,20 +257,20 @@ def main(args=None):
         parser = get_parser()
         args = parser.parse_args()
 
-
-
     if "config" in sys.argv[1]:
-        generate_config_file(config_out_path=args.config_out_path,
-                             architecture="unet",
-                             patch_size=args.patch_size,
-                             movie_dir=args.movie_dir,
-                             even_dir=args.even_dir,
-                             odd_dir=args.odd_dir,
-                             batch_size=args.batch_size,
-                             learning_rate=args.learning_rate,
-                             nb_epoch=args.nb_epoch,
-                             saved_weights_name=args.saved_weights_name,
-                             loss=args.loss,)
+        generate_config_file(
+            config_out_path=args.config_out_path,
+            architecture="unet",
+            patch_size=args.patch_size,
+            movie_dir=args.movie_dir,
+            even_dir=args.even_dir,
+            odd_dir=args.odd_dir,
+            batch_size=args.batch_size,
+            learning_rate=args.learning_rate,
+            nb_epoch=args.nb_epoch,
+            saved_weights_name=args.saved_weights_name,
+            loss=args.loss,
+        )
     else:
         if isinstance(args.gpu, list):
             if len(args.gpu) == 1:
@@ -281,14 +285,16 @@ def main(args=None):
             config = read_config(args.config_path)
 
             from . import train
+
             loss = "mae"
             if "loss" in config["train"]:
-                if "mae" == config["train"]["loss"] or "mse" == config["train"]["loss"]:\
+                if "mae" == config["train"]["loss"] or "mse" == config["train"]["loss"]:
                     loss = config["train"]["loss"]
                 else:
-                    print("Unsupported loss chosen:",config["train"]["loss"])
+                    print("Unsupported loss chosen:", config["train"]["loss"])
                     print("Use default loss MAE")
             from . import utils
+
             fbinning = utils.fourier_binning
             if "binning" in config["train"]:
                 if config["train"]["binning"] == "rescale":
@@ -306,7 +312,10 @@ def main(args=None):
                 learning_rate=config["train"]["learning_rate"],
                 epochs=config["train"]["nb_epoch"],
                 model=config["model"]["architecture"],
-                patch_size=(config["model"]["patch_size"], config["model"]["patch_size"]),
+                patch_size=(
+                    config["model"]["patch_size"],
+                    config["model"]["patch_size"],
+                ),
                 batch_size=config["train"]["batch_size"],
                 loss=loss,
                 fbinning=fbinning,
@@ -353,36 +362,43 @@ def main(args=None):
                 batch_size=batch_size,
             )
 
-def generate_config_file(config_out_path,
-                         architecture,
-                         patch_size,
-                         movie_dir,
-                         even_dir,
-                         odd_dir,
-                         batch_size,
-                         learning_rate,
-                         nb_epoch,
-                         saved_weights_name,
-                         loss):
-    model_dict = {'architecture': architecture,
-                  'patch_size': patch_size,
-                  }
 
-    train_dict = {'movie_dir': movie_dir,
-                  'even_dir': even_dir,
-                  'odd_dir': odd_dir,
-                  'batch_size': batch_size,
-                  'learning_rate': learning_rate,
-                  'nb_epoch': nb_epoch,
-                  "saved_weights_name": saved_weights_name,
-                  "loss": loss,
-                  }
+def generate_config_file(
+    config_out_path,
+    architecture,
+    patch_size,
+    movie_dir,
+    even_dir,
+    odd_dir,
+    batch_size,
+    learning_rate,
+    nb_epoch,
+    saved_weights_name,
+    loss,
+):
+    model_dict = {
+        "architecture": architecture,
+        "patch_size": patch_size,
+    }
+
+    train_dict = {
+        "movie_dir": movie_dir,
+        "even_dir": even_dir,
+        "odd_dir": odd_dir,
+        "batch_size": batch_size,
+        "learning_rate": learning_rate,
+        "nb_epoch": nb_epoch,
+        "saved_weights_name": saved_weights_name,
+        "loss": loss,
+    }
 
     from json import dump
+
     dict = {"model": model_dict, "train": train_dict}
-    with open(config_out_path, 'w') as f:
+    with open(config_out_path, "w") as f:
         dump(dict, f, ensure_ascii=False, indent=4)
     print("Wrote config to", config_out_path)
+
 
 def read_config(config_path):
     with open(config_path) as config_buffer:

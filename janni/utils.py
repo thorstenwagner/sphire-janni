@@ -35,13 +35,13 @@ SUPPORTED_FILES = (".mrc", ".mrcs", ".tiff", ".tif")
 
 
 def image_to_patches(image, patch_size=(1024, 1024), padding=15):
-    '''
+    """
     Divides an image into patches
     :param image: 2D numpy array
     :param patch_size: Size of patches in pixel
     :param padding: Number of pixel the patches do overlap.
     :return: 3D Numpy array with shape (NUM_PATCHES,PATCH_WIDTH,PATCH_HIGHT) and applied pads
-    '''
+    """
     roi_size = (patch_size[0] - 2 * padding, patch_size[1] - 2 * padding)
 
     pad_before0 = padding
@@ -83,14 +83,14 @@ def image_to_patches(image, patch_size=(1024, 1024), padding=15):
 
 
 def patches_to_image(patches, pads, image_shape=(4096, 4096), padding=15):
-    '''
+    """
     Stitches the image together given the patches.
     :param patches: 3D numpy array with shape (NUM_PATCHES,PATCH_WIDTH,PATCH_HIGHT)
     :param pads: Applied pads
     :param image_shape: Original image size
     :param padding: Specified padding
     :return: Image as 2D numpy array
-    '''
+    """
     patch_size = (patches.shape[1], patches.shape[2])
 
     roi_size = (patch_size[0] - 2 * padding, patch_size[1] - 2 * padding)
@@ -146,10 +146,13 @@ def patches_to_image(patches, pads, image_shape=(4096, 4096), padding=15):
     image = image[pads[0][0] : -pads[0][1], pads[1][0] : -pads[1][1]]
     return image
 
+
 def rescale_binning(image, bin_factor):
     from skimage.transform import rescale
-    image = rescale(image,1.0/bin_factor)
+
+    image = rescale(image, 1.0 / bin_factor)
     return image
+
 
 def fourier_binning(image, bin_factor):
     image = np.squeeze(image)
@@ -157,33 +160,38 @@ def fourier_binning(image, bin_factor):
     newx = image.shape[1] // bin_factor
     newy = image.shape[0] // bin_factor
 
-    assert image.shape[0] % bin_factor == 0 and image.shape[1] % bin_factor == 0, "ERROR! Dimensions are not integer-divisible by downsampling factor"
-    assert newx % bin_factor == 0 and newy % bin_factor == 0, "ERROR! Final dimensions need to be even (for now)"
+    assert (
+        image.shape[0] % bin_factor == 0 and image.shape[1] % bin_factor == 0
+    ), "ERROR! Dimensions are not integer-divisible by downsampling factor"
+    assert (
+        newx % bin_factor == 0 and newy % bin_factor == 0
+    ), "ERROR! Final dimensions need to be even (for now)"
 
     imft = np.fft.fft2(image)
 
     # Shift origin to center (so that I can cut out the middle)
-    shft= np.roll(np.roll(imft, newx//2, axis=0), newy//2, axis=1)
+    shft = np.roll(np.roll(imft, newx // 2, axis=0), newy // 2, axis=1)
 
     # Cut out the middle
-    wift= shft[:newy,:newx]
+    wift = shft[:newy, :newx]
 
     # Shift origin back to (0,0)
-    wishft= np.roll(np.roll(wift, -newx//2, axis=0), -newy//2, axis=1)
+    wishft = np.roll(np.roll(wift, -newx // 2, axis=0), -newy // 2, axis=1)
 
     # Compute invertse FT
     real_array = np.fft.ifft2(wishft).real
-    real_array = real_array-np.mean(real_array)+np.mean(image)
+    real_array = real_array - np.mean(real_array) + np.mean(image)
     real_array = real_array.astype(np.float32)
 
     return real_array
 
-def create_image_pair(movie_path,fbinning=fourier_binning):
-    '''
+
+def create_image_pair(movie_path, fbinning=fourier_binning):
+    """
     Calculates averages based on even / odd frames in a movie
     :param movie_path: Path to movie
     :return: even and odd average
-    '''
+    """
     import os
 
     bin_file = os.path.join(os.path.dirname(movie_path), "bin.txt")
@@ -194,19 +202,19 @@ def create_image_pair(movie_path,fbinning=fourier_binning):
 
     if os.path.exists(bin_file):
         bin_factor = int(np.genfromtxt(bin_file))
-        print("Do",bin_factor,"x binning", movie_path)
-        even = fbinning(even,bin_factor)
-        odd = fbinning(odd,bin_factor)
+        print("Do", bin_factor, "x binning", movie_path)
+        even = fbinning(even, bin_factor)
+        odd = fbinning(odd, bin_factor)
 
     return even, odd
 
 
 def normalize(img):
-    '''
+    """
     Normalize a 2D image. Furthermore it will limit the values to -3 and 3 standard deviations.
     :param img: Image to normalize (2D numpy array)
     :return:  Normalized image, mean, standard diviation
-    '''
+    """
     mean = np.mean(img)
     sd = np.std(img)
     img = (img - mean) / sd
@@ -214,18 +222,18 @@ def normalize(img):
     return img, mean, sd
 
 
-def read_image(path,use_mmap=False):
+def read_image(path, use_mmap=False):
     if path.endswith((".tif", ".tiff")):
         try:
-            img = tifffile.memmap(path,mode="r")
+            img = tifffile.memmap(path, mode="r")
         except ValueError:
             img = tifffile.imread(path)
         return img
     elif path.endswith(("mrc", "mrcs")):
         if use_mmap == False:
-            mrc_image_data = mrcfile.open(path, permissive=True, mode='r')
+            mrc_image_data = mrcfile.open(path, permissive=True, mode="r")
         else:
-            mrc_image_data = mrcfile.mmap(path, permissive=True, mode='r')
+            mrc_image_data = mrcfile.mmap(path, permissive=True, mode="r")
         return mrc_image_data.data
     else:
         print("Image format not supported. File: ", path)
@@ -233,11 +241,11 @@ def read_image(path,use_mmap=False):
 
 
 def is_movie(path):
-    '''
+    """
     Checks if file is movie or not
     :param path: Path to file
     :return: True if movie.
-    '''
+    """
     if path.endswith((".tif", ".tiff")):
         tif = tifffile.TiffFile(path)
         return len(tif.pages) > 1

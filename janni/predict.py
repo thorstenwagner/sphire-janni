@@ -35,6 +35,7 @@ import mrcfile
 import tifffile
 import pathlib
 
+
 def predict(
     input_path,
     output_path,
@@ -43,7 +44,7 @@ def predict(
     patch_size=(1024, 1024),
     padding=15,
     batch_size=4,
-    output_resize_to=None
+    output_resize_to=None,
 ):
 
     if model == "unet" or model == b"unet":
@@ -63,6 +64,7 @@ def predict(
         output_resize_to=output_resize_to,
     )
 
+
 def predict_dir(
     input_path,
     output_path,
@@ -70,7 +72,7 @@ def predict_dir(
     patch_size=(1024, 1024),
     padding=15,
     batch_size=4,
-    output_resize_to=None
+    output_resize_to=None,
 ):
     """
     Denoises images / movies
@@ -87,7 +89,7 @@ def predict_dir(
     if os.path.isfile(input_path):
         list_files = [input_path]
     else:
-        for (dirpath, dirnames, filenames) in os.walk(input_path):
+        for dirpath, dirnames, filenames in os.walk(input_path):
             for filename in filenames:
                 if filename.endswith(utils.SUPPORTED_FILES):
                     path = os.path.join(dirpath, filename)
@@ -100,10 +102,11 @@ def predict_dir(
         patch_size=patch_size,
         padding=padding,
         batch_size=batch_size,
-        output_resize_to=output_resize_to
+        output_resize_to=output_resize_to,
     )
 
     return denoise_image_paths
+
 
 def predict_list(
     image_paths,
@@ -115,7 +118,7 @@ def predict_list(
     output_resize_to=None,
     squarify=False,
     fbinning=utils.fourier_binning,
-    sliceswise=False
+    sliceswise=False,
 ):
     """
     Denoises images / movies
@@ -152,7 +155,7 @@ def predict_list(
             if not os.path.exists(opath):
                 if utils.is_movie(path):
                     if not sliceswise:
-                        even, odd = utils.create_image_pair(path,fbinning)
+                        even, odd = utils.create_image_pair(path, fbinning)
                         denoised_even = predict_np(
                             model,
                             even,
@@ -175,7 +178,7 @@ def predict_list(
                         for z in range(img.shape[0]):
                             denoised[z] = predict_np(
                                 model,
-                                img[z,:,:],
+                                img[z, :, :],
                                 patch_size=patch_size,
                                 padding=padding,
                                 batch_size=batch_size,
@@ -209,15 +212,25 @@ def predict_list(
                         resize_to = [height, width]
 
                     from PIL import Image
-                    if len(denoised.shape)==2:
-                        denoised = np.array(Image.fromarray(denoised).resize(
-                            (resize_to[1], resize_to[0]), resample=Image.BILINEAR))
-                    elif len(denoised.shape)==3:
-                        resized_denoised = np.zeros(shape=(denoised.shape[0],resize_to[0],resize_to[1]),dtype=np.float32)
-                        for z in range(img.shape[0]):
-                            resized_denoised[z,:,:] =  np.array(Image.fromarray(denoised[z,:,:]).resize(
-                            (resize_to[1], resize_to[0]), resample=Image.BILINEAR))
 
+                    if len(denoised.shape) == 2:
+                        denoised = np.array(
+                            Image.fromarray(denoised).resize(
+                                (resize_to[1], resize_to[0]), resample=Image.BILINEAR
+                            )
+                        )
+                    elif len(denoised.shape) == 3:
+                        resized_denoised = np.zeros(
+                            shape=(denoised.shape[0], resize_to[0], resize_to[1]),
+                            dtype=np.float32,
+                        )
+                        for z in range(img.shape[0]):
+                            resized_denoised[z, :, :] = np.array(
+                                Image.fromarray(denoised[z, :, :]).resize(
+                                    (resize_to[1], resize_to[0]),
+                                    resample=Image.BILINEAR,
+                                )
+                            )
 
                 print("Write denoised image in", opath)
                 if opath.endswith((".mrc", ".mrcs")):
@@ -231,17 +244,22 @@ def predict_list(
 
     return denoise_image_paths
 
+
 def squarify(image, size=None):
     np.random.seed()
     if size is not None:
-        target_size=size
+        target_size = size
     else:
         target_size = np.max(image.shape)
     mean = np.mean(image)
     rectified_image = np.ones(shape=(target_size, target_size)) * mean
-    rectified_image[(rectified_image.shape[0]-image.shape[0]):rectified_image.shape[0],0:image.shape[1]] = image
+    rectified_image[
+        (rectified_image.shape[0] - image.shape[0]) : rectified_image.shape[0],
+        0 : image.shape[1],
+    ] = image
 
     return rectified_image
+
 
 def predict_np(model, image, patch_size=(1024, 1024), padding=15, batch_size=4):
     """
