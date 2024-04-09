@@ -1,0 +1,1 @@
+conda create -n janni -c anaconda python=3.7 cudnn=7.6.5 cudatoolkit=10.0.130 libtiff wxPython=4.1.0 -c conda-forge
