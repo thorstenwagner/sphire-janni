@@ -1,4 +1,4 @@
-/.eggs
-/dist/*
-/build
+/.eggs/
+/dist/
+/build/
 /.idea
